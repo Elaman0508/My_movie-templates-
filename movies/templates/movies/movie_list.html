@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>🎬 Фильмы</h1>
+
+<form method="get" style="margin-bottom:20px;">
+
+<input name="q" placeholder="Поиск" value="{{ q }}">
+
+<select name="genre">
+  <option value="">Все жанры</option>
+  {% for g in genres %}
+    <option value="{{ g.id }}" {% if g.id|stringformat:"s" == selected_genre %}selected{% endif %}>
+      {{ g.name }}
+    </option>
+  {% endfor %}
+</select>
+
+<select name="sort">
+  <option value="">По дате</option>
+  <option value="rating" {% if sort == 'rating' %}selected{% endif %}>По рейтингу</option>
+</select>
+
+<button>Найти</button>
+
+<a href="{% url 'movie_create' %}">➕ Добавить фильм</a>
+
+</form>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px;">
+
+{% for movie in page_obj %}
+<div style="border:1px solid #ccc;padding:10px;width:200px;">
+{% if movie.poster %}
+<img src="{{ movie.poster.url }}" width="180">
+{% endif %}
+<h3><a href="{% url 'movie_detail' movie.id %}">{{ movie.title }}</a></h3>
+<p>{{ movie.year }}</p>
+<p>⭐ {{ movie.rating }}</p>
+</div>
+{% endfor %}
+
+</div>
+
+<br>
+
+<div>
+{% if page_obj.has_previous %}
+  <a href="?page={{ page_obj.previous_page_number }}&q={{ q }}&genre={{ selected_genre }}&sort={{ sort }}">⬅</a>
+{% endif %}
+
+<span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+
+{% if page_obj.has_next %}
+  <a href="?page={{ page_obj.next_page_number }}&q={{ q }}&genre={{ selected_genre }}&sort={{ sort }}">➡</a>
+{% endif %}
+</div>
+
+{% endblock %}

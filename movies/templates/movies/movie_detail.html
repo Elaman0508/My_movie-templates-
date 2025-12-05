@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>{{ movie.title }}</h1>
+
+{% if movie.poster %}
+<img src="{{ movie.poster.url }}" width="300">
+{% endif %}
+
+<p>{{ movie.year }} | {{ movie.genre }} | ⭐ {{ movie.rating }}</p>
+
+<p>{{ movie.description }}</p>
+
+<hr>
+
+<h3>💬 Комментарии</h3>
+
+{% for comment in comments %}
+  <p><b>{{ comment.name }}:</b> {{ comment.text }}</p>
+{% empty %}
+  <p>Пока нет комментариев.</p>
+{% endfor %}
+
+<h4>➕ Добавить комментарий</h4>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button>Отправить</button>
+</form>
+
+<br>
+<a href="/">⬅ Назад</a>
+
+{% endblock %}
