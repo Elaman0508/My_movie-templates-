@@ -1,12 +1,101 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h1>Добавить фильм</h1>
+<div class="max-w-6xl mx-auto mt-12 grid md:grid-cols-2 gap-12 p-8 bg-gray-900 rounded-2xl shadow-2xl text-white">
 
-<form method="post" enctype="multipart/form-data">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button>Сохранить</button>
-</form>
+  <!-- Левая колонка: форма -->
+  <div class="space-y-6">
+    <h1 class="text-4xl font-bold mb-4 text-center md:text-left text-blue-400 animate-pulse">Добавить фильм</h1>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-5">
+      {% csrf_token %}
+
+      {% for field in form %}
+        <div class="flex flex-col relative group">
+          <label class="mb-1 font-semibold text-gray-200 group-hover:text-blue-400 transition" for="{{ field.id_for_label }}">
+            {{ field.label }}
+            {% if field.help_text %}
+              <span class="text-sm text-gray-400">({{ field.help_text }})</span>
+            {% endif %}
+          </label>
+
+          {% if field.widget.input_type == "file" %}
+            <div class="border border-gray-600 rounded px-3 py-2 hover:border-blue-500 transition">
+              {{ field }}
+            </div>
+          {% else %}
+            <input
+              type="{{ field.field.widget.input_type }}"
+              name="{{ field.name }}"
+              value="{{ field.value|default_if_none:'' }}"
+              id="{{ field.id_for_label }}"
+              placeholder="{{ field.label }}"
+              class="bg-gray-800 text-white border border-gray-600 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 hover:border-blue-400"
+            >
+          {% endif %}
+
+          {% if field.errors %}
+            <span class="text-red-400 text-sm mt-1 animate-pulse">{{ field.errors|striptags }}</span>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded font-bold shadow-lg transform hover:scale-105 transition duration-300">
+        Сохранить
+      </button>
+    </form>
+  </div>
+
+  <!-- Правая колонка: превью фильма -->
+  <div class="flex flex-col items-center justify-start space-y-6">
+    <h2 class="text-2xl font-semibold text-gray-200 mb-4">Превью фильма</h2>
+
+    <div class="w-full max-w-xs bg-gray-800 rounded-xl shadow-2xl overflow-hidden transform hover:scale-105 transition duration-300">
+      <img id="posterPreview" src="#" alt="Превью постера" class="w-full h-96 object-cover bg-gray-700 hidden transition-opacity duration-500 opacity-0">
+      <div class="p-4">
+        <h3 id="previewTitle" class="text-xl font-bold text-white transition-colors duration-300">Название фильма</h3>
+        <p id="previewDesc" class="text-gray-400 mt-2 text-sm transition-opacity duration-300">Описание появится после ввода.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // JS для превью постера
+  const fileInput = document.querySelector('input[type="file"]');
+  const previewImg = document.getElementById('posterPreview');
+  const titleField = document.querySelector('input[name="title"]');
+  const descField = document.querySelector('textarea[name="description"]');
+  const previewTitle = document.getElementById('previewTitle');
+  const previewDesc = document.getElementById('previewDesc');
+
+  if(fileInput){
+    fileInput.addEventListener('change', function(e){
+      const file = e.target.files[0];
+      if(file){
+        const reader = new FileReader();
+        reader.onload = function(event){
+          previewImg.src = event.target.result;
+          previewImg.classList.remove('hidden');
+          previewImg.classList.add('opacity-100');
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  // Динамическое обновление превью названия и описания
+  if(titleField){
+    titleField.addEventListener('input', function(){
+      previewTitle.textContent = titleField.value || "Название фильма";
+    });
+  }
+
+  if(descField){
+    descField.addEventListener('input', function(){
+      previewDesc.textContent = descField.value || "Описание появится после ввода.";
+    });
+  }
+</script>
 
 {% endblock %}
